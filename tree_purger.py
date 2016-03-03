@@ -13,7 +13,7 @@ import math
 # Option parser and constants
 TREE_PURGER = 'v1.0.0'
 DEFAULT_JSON = 'tree_purger_index.json'
-DEFAULT_LOG = 'tree_purge.log'
+DEFAULT_LOG = 'tree_purger.log'
 DEFAULT_REGEX = '.*'
 DEFAULT_DAYS = '0'
 parser = OptionParser(version='%prog ' + TREE_PURGER)
@@ -25,7 +25,7 @@ parser.add_option(
     '-r', '--regex', dest='regex', default=DEFAULT_REGEX,
     help='Delete files matching regex [default: %default]')
 parser.add_option(
-    '-i', '--indexfile', dest='indexfile',
+    '-i', '--index', dest='index',
     default=DEFAULT_JSON,
     help='Path to JSON file [default: %default]')
 parser.add_option(
@@ -56,7 +56,7 @@ parser.add_option(
 # Constants
 SOURCE_DIR = options.sourcedir
 REGEX = options.regex
-INDEX_FILE = options.indexfile
+INDEX_FILE = options.index
 PURGE_LOG = options.logfile
 DAYS = options.days
 INDEX_ONLY = options.indexonly
@@ -87,7 +87,9 @@ class Purge(object):
         super(Purge, self).__init__()
 
         # Log
-        logger.info('Purge started: ' + unicode(NOW_TIMESTAMP))
+        logger.info('Purge started at ' + unicode(NOW_TIMESTAMP))
+        logger.info('Source dir: ' + self.enc(os.path.abspath(SOURCE_DIR)))
+        logger.info('Log file: ' + self.enc(os.path.abspath(PURGE_LOG)))
 
         # Indexing
         if not SKIP_INDEXING:
@@ -101,10 +103,27 @@ class Purge(object):
                 self.delete_file(filepath=filepath)
 
         # Summary
-        bytes = 0
-        for filepath, ddata in index.iteritems():
-            bytes += ddata['b']
-        kb = bytes / 1024.0
+        summary = self.summary(index=index)
+
+        # Log
+        logger.info('Files: ' + str(len(index)))
+        logger.info('Total size: ' + summary['size'])
+        logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
+
+    def round(self, f):
+        """ Round number to two decimals
+        """
+        return math.ceil(f*100)/100
+
+    def enc(self, text):
+        """ Encodes unicode text
+        """
+        return unicode(text).encode('utf-8').strip()
+
+    def nice_number(self, b):
+        """ Convert bytes into something nicer
+        """
+        kb = b / 1024.0
         mb = kb / 1024.0
         gb = mb / 1024.0
         tb = gb / 1024.0
@@ -119,21 +138,21 @@ class Purge(object):
         else:
             size = str(self.round(f=b)) + 'bytes'
 
-        # Log
-        logger.info('\nSummary:')
-        logger.info('Files: ' + str(len(index)))
-        logger.info('Total size: ' + size)
-        logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
+        return size
 
-    def round(self, f):
-        """ Round number to two decimals
+    def summary(self, index):
+        """ Create summary and return
         """
-        return math.ceil(f*100)/100
+        summary = {}
 
-    def enc(self, text):
-        """ Encodes unicode text
-        """
-        return unicode(text).encode('utf-8').strip()
+        b = 0
+        for filepath, ddata in index.iteritems():
+            b += ddata['b']  # bytes
+        size = self.nice_number(b=b)
+
+        summary['size'] = size
+
+        return summary
 
     def delete_empty_dir(self, dirpath):
         """ Deletes directory of file, if the directory is empty.
@@ -227,12 +246,12 @@ class Purge(object):
 
                 if file_registered:
                     # File size in bytes
-                    bytes = os.stat(filepath).st_size
-                    index[filepath]['b'] = bytes
+                    b = os.stat(filepath).st_size
+                    index[filepath]['b'] = b
+                    size = self.nice_number(b=b)
 
                     if not SILENT:
-                        print len(path)*'-', file
-
+                        print len(path)*'-', file, '('+size+')'
 
         return index
 
