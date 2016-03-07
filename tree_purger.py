@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import platform
 from optparse import OptionParser
 import logging
 import sys
@@ -162,12 +161,12 @@ class Purge(object):
             if len(files_in_dir) == 0:
                 if DELETE and DELETE_EMPTY_DIRS:
                     try:
-                        os.remove(directory)
+                        os.remove(dirpath)
                         logger.info('Deleted: ' + self.enc(dirpath))
                     except:
                         logger.error('Could not delete: ' + self.enc(dirpath))
         else:
-            logger.error('Does not exist: ' + self.enc(filepath))
+            logger.error('Does not exist: ' + self.enc(dirpath))
 
     def delete_file(self, filepath):
         """ Delete the file given.
@@ -293,7 +292,7 @@ class Purge(object):
         """ If file is older than n days, return False. If file is not
         older than n days, return True.
         """
-        #now_timestamp = datetime.datetime.now()
+        # now_timestamp = datetime.datetime.now()
         timedelta = NOW_TIMESTAMP - timestamp
         if int(timedelta.days) > int(DAYS):
             return False
