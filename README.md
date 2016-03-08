@@ -11,15 +11,41 @@ Options:
                         Absolute path to dir to purge [default: .]
   -r REGEX, --regex=REGEX
                         Delete files matching regex [default: .*]
-  -i INDEXFILE, --indexfile=INDEXFILE
+  -i INDEX, --index=INDEX
                         Path to JSON file [default: tree_purger_index.json]
   -l LOGFILE, --log=LOGFILE
-                        Path to log file [default: tree_purge.log]
+                        Path to log file [default: tree_purger.log]
   -d DAYS, --days=DAYS  Keep files which are DAYS days old [default: 0]
-  --indexonly           Only index directory tree and generate index.json.
-  --skipindexing        Skip indexing phase.
+  --index-only          Only index directory tree and generate index.json.
+  --skip-indexing       Skip indexing phase.
   --delete              Actually delete files. If not specified, script will
                         always run in "dry-run" mode.
   --delete-empty-dirs   Deletes empty directories. Requires --delete.
   --silent              Do not output progress (faster).
   ```
+
+# tree_leafsize
+
+Python script to analyze a directory and create charts based on different criteria
+
+```
+Usage: tree_leafsize.py [options]
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -s SOURCEDIR, --source-dir=SOURCEDIR
+                        Absolute path to dir to purge [default: .]
+  -r REGEX, --regex=REGEX
+                        Calculate size for leaf matching regex [default:
+                        proj\d*$]
+  -i INDEX, --index=INDEX
+                        Path to JSON file [default: tree_leafsize_index.json]
+  -l LOGFILE, --log=LOGFILE
+                        Path to log file [default: tree_leafsize.log]
+  -d DAYS, --days=DAYS  Skip leaves which are DAYS days old [default: 0]
+  --index-only          Only index directory tree and generate index.json.
+  --skip-indexing       Skip indexing phase.
+  --sort-by-size        Sort by size.
+  --silent              Do not output progress (faster).
+```
