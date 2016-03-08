@@ -68,13 +68,15 @@ class Index(object):
             path = root.split('/')
             if not self.c['silent']:
                 print (len(path) - 1) * '-', os.path.basename(root)
-            for file in files:
-                file_registered = False
-                filepath = os.path.join(root, file)
+
+            items = files + dirs
+            for i in items:
+                item_registered = False
+                filepath = os.path.join(root, i)
 
                 if 'days' not in limit and 'regex' not in limit:
                     index[filepath] = {}
-                    file_registered = True
+                    item_registered = True
 
                 elif 'days' in limit and 'regex' not in limit:
                     timestamp = functions.modification_date(filepath=filepath)
@@ -87,7 +89,7 @@ class Index(object):
                         if filepath not in index:
                             index[filepath] = {}
                         index[filepath]['t'] = unicode(timestamp)
-                        file_registered = True
+                        item_registered = True
 
                 elif 'days' not in limit and 'regex' in limit:
                     match = re.search(r''+self.c['regex']+'', filepath)
@@ -95,7 +97,7 @@ class Index(object):
                         if filepath not in index:
                             index[filepath] = {}
                         index[filepath]['r'] = 'True'
-                        file_registered = True
+                        item_registered = True
 
                 elif 'days' in limit and 'regex' in limit:
                     timestamp = functions.modification_date(filepath=filepath)
@@ -109,18 +111,39 @@ class Index(object):
                             if filepath not in index:
                                 index[filepath] = {}
                             index[filepath]['r'] = 'True'
-                            file_registered = True
+                            item_registered = True
 
-                if file_registered:
-                    # File size in bytes
-                    b = os.stat(filepath).st_size
-                    index[filepath]['b'] = b
-                    size = functions.nice_number(b=b)
+                if item_registered:
+                    if self.c['tool'] == 'tree_purger':
+                        b = self.file_size(filepath=filepath)
+                        index[filepath]['b'] = b
+                    elif self.c['tool'] == 'tree_leafsize':
+                        if os.path.isdir(filepath):
+                            b = self.folder_tree_size(filepath=filepath)
+                        else:
+                            b = self.file_size(filepath=filepath)
+                        index[filepath]['b'] = b
 
                     if not self.c['silent']:
-                        print len(path)*'-', file, '('+size+')'
+                        size = functions.nice_number(b=b)
+                        print len(path)*'-', i, '('+size+')'
 
         return index
+
+    def file_size(self, filepath):
+        # File size in bytes
+        b = os.stat(filepath).st_size
+        return b
+
+    def folder_tree_size(self, filepath):
+        # Folder tree size in bytes
+        b = self.file_size(filepath)
+        for root, dirs, files in os.walk(filepath):
+            items = dirs + files
+            for i in items:
+                fp = os.path.join(root, i)
+                b += os.stat(fp).st_size
+        return b
 
     def write_json(self, data):
         with open(self.c['index_file'], 'w') as outfile:

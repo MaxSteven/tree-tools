@@ -3,6 +3,8 @@
 import os
 import datetime
 import math
+import json
+import operator
 
 
 class TreeFunctions(object):
@@ -38,7 +40,7 @@ class TreeFunctions(object):
         """
         return math.ceil(f*100)/100
 
-    def nice_number(self, b):
+    def nice_number_old(self, b):
         """ Convert bytes into something nicer
         """
         kb = b / 1024.0
@@ -54,6 +56,42 @@ class TreeFunctions(object):
         elif kb > 1.0:
             size = str(self.round(f=kb)) + ' kb'
         else:
-            size = str(self.round(f=b)) + 'bytes'
-
+            size = str(self.round(f=b)) + ' bytes'
         return size
+
+    def nice_number(self, b, return_div=False):
+        div = 0
+        for unit in ['bytes', 'Kb', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB']:
+            if abs(b) < 1024.0:
+                size = str(self.round(f=b)) + ' ' + unit
+                if return_div:
+                    return size, div
+                else:
+                    return size
+            b /= 1024.0
+            div += 1024.0
+
+    def summary(self, index):
+        """ Create summary and return
+        """
+        summary = {}
+
+        b = 0
+        for filepath, ddata in index.iteritems():
+            b += ddata['b']  # bytes
+        size = self.nice_number(b=b)
+
+        summary['size'] = size
+
+        return summary
+
+    def read_json(self, filepath):
+        with open(filepath, 'r') as infile:
+            index = json.load(infile)
+        return index
+
+    def sort_index_by_size(self, index):
+        sorted_index = sorted(index.items(),
+                              key=operator.itemgetter(1),
+                              reverse=True)
+        return sorted_index
