@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-import logging
 import sys
 import os
 import datetime
 import json
-import re
-import math
+
+import tree_functions
+import tree_logger
+import tree_indexer
 
 # Option parser and constants
 TREE_PURGER = 'v1.0.0'
@@ -53,31 +54,26 @@ parser.add_option(
 (options, args) = parser.parse_args()
 
 # Constants
-SOURCE_DIR = options.sourcedir
-REGEX = options.regex
-INDEX_FILE = options.index
-PURGE_LOG = options.logfile
-DAYS = options.days
-INDEX_ONLY = options.indexonly
-SKIP_INDEXING = options.skipindexing
-DELETE = options.delete
-DELETE_EMPTY_DIRS = options.deleteemptydirs
-SILENT = options.silent
-NOW_TIMESTAMP = datetime.datetime.now()
+c = {}
+c['default_days'] = DEFAULT_DAYS
+c['default_regex'] = DEFAULT_REGEX
+c['src_dir'] = options.sourcedir
+c['regex'] = options.regex
+c['index_file'] = options.index
+c['log_file'] = options.logfile
+c['days'] = options.days
+c['index_only'] = options.indexonly
+c['skip_indexing'] = options.skipindexing
+c['delete'] = options.delete
+c['delete_empty_dirs'] = options.deleteemptydirs
+c['silent'] = options.silent
+c['now_timestamp'] = datetime.datetime.now()
 
-# Logging
-logger = logging.getLogger('TreePurgerLogger')
-hdlr = logging.FileHandler(PURGE_LOG)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
+# Logger
+logger = tree_logger.tree_logger(purge_log=c['log_file'])
 
-# Logging to stdout
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.INFO)
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+# Shared functions
+functions = tree_functions.TreeFunctions()
 
 
 class Purge(object):
@@ -85,19 +81,22 @@ class Purge(object):
     def __init__(self):
         super(Purge, self).__init__()
 
-        # Log
-        logger.info('Purge started at ' + unicode(NOW_TIMESTAMP))
-        logger.info('Source dir: ' + self.enc(os.path.abspath(SOURCE_DIR)))
-        logger.info('Log file: ' + self.enc(os.path.abspath(PURGE_LOG)))
-
         # Indexing
-        if not SKIP_INDEXING:
-            index = self.indexer()  # traverse
-            self.write_json(data=index)  # dump index to disk
+        if not c['skip_indexing']:
+            tree_indexer.Index(logger=logger, constants=c)
+
+        # Log
+        logger.info('Purge started at ' + unicode(c['now_timestamp']))
+        logger.info('Source dir: ' +
+                    functions.enc(os.path.abspath(c['src_dir'])))
+        logger.info('Log file: ' +
+                    functions.enc(os.path.abspath(c['log_file'])))
+
+        # Read json index
+        index = self.read_json(filepath=c['index_file'])  # load index
 
         # Delete files
-        if not INDEX_ONLY:
-            index = self.read_json(filepath=INDEX_FILE)  # load index
+        if not c['index_only']:
             for filepath, ddata in index.iteritems():
                 self.delete_file(filepath=filepath)
 
@@ -109,36 +108,6 @@ class Purge(object):
         logger.info('Total size: ' + summary['size'])
         logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
 
-    def round(self, f):
-        """ Round number to two decimals
-        """
-        return math.ceil(f*100)/100
-
-    def enc(self, text):
-        """ Encodes unicode text
-        """
-        return unicode(text).encode('utf-8').strip()
-
-    def nice_number(self, b):
-        """ Convert bytes into something nicer
-        """
-        kb = b / 1024.0
-        mb = kb / 1024.0
-        gb = mb / 1024.0
-        tb = gb / 1024.0
-        if tb > 1.0:
-            size = str(self.round(f=tb)) + ' TB'
-        elif gb > 1.0:
-            size = str(self.round(f=gb)) + ' GB'
-        elif mb > 1.0:
-            size = str(self.round(f=mb)) + ' MB'
-        elif kb > 1.0:
-            size = str(self.round(f=kb)) + ' kb'
-        else:
-            size = str(self.round(f=b)) + 'bytes'
-
-        return size
-
     def summary(self, index):
         """ Create summary and return
         """
@@ -147,7 +116,7 @@ class Purge(object):
         b = 0
         for filepath, ddata in index.iteritems():
             b += ddata['b']  # bytes
-        size = self.nice_number(b=b)
+        size = functions.nice_number(b=b)
 
         summary['size'] = size
 
@@ -159,151 +128,46 @@ class Purge(object):
         if os.path.exists(dirpath):
             files_in_dir = os.listdir(dirpath)
             if len(files_in_dir) == 0:
-                if DELETE and DELETE_EMPTY_DIRS:
+                if c['delete'] and c['delete_empty_dirs']:
                     try:
                         os.remove(dirpath)
-                        logger.info('Deleted: ' + self.enc(dirpath))
+                        logger.info('Deleted: ' + functions.enc(dirpath))
                     except:
-                        logger.error('Could not delete: ' + self.enc(dirpath))
+                        logger.error('Could not delete: ' +
+                                     functions.enc(dirpath))
         else:
-            logger.error('Does not exist: ' + self.enc(dirpath))
+            logger.error('Does not exist: ' + functions.enc(dirpath))
 
     def delete_file(self, filepath):
         """ Delete the file given.
         """
         if os.path.exists(filepath):
-            if not DELETE:
-                logger.info('Deleting (dry-run): ' + self.enc(filepath))
+            if not c['delete']:
+                logger.info('Deleting (dry-run): ' + functions.enc(filepath))
             else:
                 try:
                     os.remove(filepath)
-                    logger.info('Deleting: ' + self.enc(filepath))
+                    logger.info('Deleting: ' + functions.enc(filepath))
                 except:
-                    logger.error('Coult not delete: ' + self.enc(filepath))
+                    logger.error('Coult not delete: ' +
+                                 functions.enc(filepath))
         else:
-            logger.error('Does not exist: ' + self.enc(filepath))
+            logger.error('Does not exist: ' + functions.enc(filepath))
 
-        if DELETE_EMPTY_DIRS:
+        if c['delete_empty_dirs']:
             dirpath = os.path.dirname(filepath)
             self.delete_empty_dir(dirpath=dirpath)
 
-    def write_json(self, data):
-        with open(INDEX_FILE, 'w') as outfile:
-            json.dump(data, outfile, sort_keys=True, indent=4,
-                      separators=(',', ': '))
-
     def read_json(self, filepath):
-        with open(INDEX_FILE, 'r') as infile:
+        with open(c['index_file'], 'r') as infile:
             index = json.load(infile)
         return index
-
-    def traverse(self, limit):
-        """ Based on indexer method, directory will be traversed and files
-        will get registered to get deleted.
-        """
-        index = {}  # json dictionary
-        for root, dirs, files in os.walk(unicode(SOURCE_DIR)):
-            path = root.split('/')
-            if not SILENT:
-                print (len(path) - 1) * '-', os.path.basename(root)
-            for file in files:
-                file_registered = False
-                filepath = os.path.join(root, file)
-
-                if 'days' not in limit and 'regex' not in limit:
-                    index[filepath] = {}
-                    file_registered = True
-
-                elif 'days' in limit and 'regex' not in limit:
-                    timestamp = self.modification_date(filepath=filepath)
-                    keep = self.keep(timestamp=timestamp)
-                    if not keep:
-                        # Add filepath to index
-                        if filepath not in index:
-                            index[filepath] = {}
-                        index[filepath]['t'] = unicode(timestamp)
-                        file_registered = True
-
-                elif 'days' not in limit and 'regex' in limit:
-                    match = re.search(r''+REGEX+'', filepath)
-                    if match:
-                        if filepath not in index:
-                            index[filepath] = {}
-                        index[filepath]['r'] = 'True'
-                        file_registered = True
-
-                elif 'days' in limit and 'regex' in limit:
-                    timestamp = self.modification_date(filepath=filepath)
-                    keep = self.keep(timestamp=timestamp)
-                    if not keep:
-                        match = re.search(r''+REGEX+'', filepath)
-                        if match:
-                            if filepath not in index:
-                                index[filepath] = {}
-                            index[filepath]['r'] = 'True'
-                            file_registered = True
-
-                if file_registered:
-                    # File size in bytes
-                    b = os.stat(filepath).st_size
-                    index[filepath]['b'] = b
-                    size = self.nice_number(b=b)
-
-                    if not SILENT:
-                        print len(path)*'-', file, '('+size+')'
-
-        return index
-
-    def indexer(self):
-        """ Index the directory
-
-        Algorithm:
-        - If no limits, will delete all files
-        - If limit by --days ...
-        - If limit by --regex ...
-        - If limit by --days AND --regex ...
-
-        This means that algo drivers are 'DAYS' and 'REGEX' variables.
-
-        """
-        if DAYS == DEFAULT_DAYS and REGEX == DEFAULT_REGEX:
-            # no limits, will delete all files
-            index = self.traverse(limit=[])
-        elif DAYS != DEFAULT_DAYS and REGEX == DEFAULT_REGEX:
-            # limit by days
-            index = self.traverse(limit=['days'])
-        elif DAYS == DEFAULT_DAYS and REGEX != DEFAULT_REGEX:
-            # limit by regex
-            index = self.traverse(limit=['regex'])
-        elif DAYS != DEFAULT_DAYS and REGEX != DEFAULT_REGEX:
-            # limit by BOTH days and regex
-            index = self.traverse(limit=['days', 'regex'])
-
-        return index
-
-    def modification_date(self, filepath):
-        """ Return last modification date for file, in datetime format
-        """
-        s = os.path.getmtime(filepath)  # last time of modification in seconds
-        timestamp = datetime.datetime.fromtimestamp(s)  # timestamp format
-        return timestamp
-
-    def keep(self, timestamp):
-        """ If file is older than n days, return False. If file is not
-        older than n days, return True.
-        """
-        # now_timestamp = datetime.datetime.now()
-        timedelta = NOW_TIMESTAMP - timestamp
-        if int(timedelta.days) > int(DAYS):
-            return False
-        else:
-            return True
 
 
 if __name__ == '__main__':
 
     # Set contants
-    if os.path.isdir(SOURCE_DIR):
+    if os.path.isdir(c['src_dir']):
         p = Purge()
     else:
         logger.error('The directory specified does not exist or \
