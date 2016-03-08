@@ -15,7 +15,7 @@ from shared import tree_charts
 TREE_LEAFSIZE = 'v1.0.0'
 DEFAULT_JSON = 'tree_leafsize_index.json'
 DEFAULT_LOG = 'tree_leafsize.log'
-DEFAULT_REGEX = 'proj\d*$'
+DEFAULT_REGEX = '.*'
 DEFAULT_DAYS = '0'
 parser = OptionParser(version='%prog ' + TREE_LEAFSIZE)
 parser.add_option(
