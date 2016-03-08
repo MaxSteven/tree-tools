@@ -15,13 +15,14 @@ class Charts(object):
 
         self.c = constants
         unit, div = self.determine_unit(index=index)
+        summary = functions.summary(index=index)
 
         if self.c['sort_by_size']:
             index = functions.sort_index_by_size(index=index)
 
         # Create charts
-        self.bar_chart(index=index, unit=unit, div=div)
-        self.pie_chart(index=index, unit=unit, div=div)
+        self.bar_chart(index=index, unit=unit, div=div, summary=summary)
+        self.pie_chart(index=index, unit=unit, div=div, summary=summary)
 
     def determine_unit(self, index):
         """ Determine proper unit for bytes
@@ -35,7 +36,7 @@ class Charts(object):
         unit = size.split(' ')[1]
         return unit, div
 
-    def bar_chart(self, index, unit, div):
+    def bar_chart(self, index, unit, div, summary):
         """ Create a simple bar chart
         """
 
@@ -43,7 +44,7 @@ class Charts(object):
             div = 1  # prevent division if zero
 
         chart = pygal.Bar(truncate_legend=35)
-        chart.title = 'Size in ' + unit
+        chart.title = 'Total size: ' + summary['size']
         if isinstance(index, list):
             # Index has been sorted
             for item in index:
@@ -62,14 +63,14 @@ class Charts(object):
                 chart.add(nice_size + ' ' + name, values)
         chart.render_to_file('tree_leafsize_bar_chart.svg')
 
-    def pie_chart(self, index, unit, div):
+    def pie_chart(self, index, unit, div, summary):
         """ Create a simple pie chart
         """
         if div == 0:
             div = 1  # prevent division if zero
 
         chart = pygal.Pie(truncate_legend=35)
-        chart.title = 'Size in ' + unit
+        chart.title = 'Total size: ' + summary['size']
 
         if isinstance(index, list):
             # Index has been sorted
