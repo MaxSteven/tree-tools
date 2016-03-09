@@ -1,7 +1,7 @@
 # tree-tools
 
 ## tree_purger
-Python script to purge a directory tree of files based on different criteria
+Python script to purge a directory tree of files based on different criteria.
 
 ```
 Usage: tree_purger.py [options]
@@ -29,7 +29,11 @@ Options:
   ```
 
 ## tree_leafsize
-Python script to analyze a directory tree of files and create charts based on different criteria
+Python script to analyze a directory tree of files and create charts based on different criteria.
+
+#### Prerequisites
+
+Charts are made using [pygal](http://www.pygal.org). Install with `pip install pygal`.
 
 ```
 Usage: tree_leafsize.py [options]
