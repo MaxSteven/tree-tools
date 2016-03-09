@@ -4,10 +4,10 @@ import sys
 import logging
 
 
-def tree_logger(purge_log):
+def tree_logger(log_filepath):
     # Logging
     logger = logging.getLogger('TreeLogger')
-    hdlr = logging.FileHandler(purge_log)
+    hdlr = logging.FileHandler(log_filepath)
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     logger.addHandler(hdlr)

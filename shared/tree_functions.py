@@ -124,3 +124,41 @@ class TreeFunctions(object):
                               key=operator.itemgetter(1),
                               reverse=True)
         return sorted_index
+
+    def delete_empty_dir(self, dirpath, constants, logger):
+        """ Deletes directory of file, if the directory is empty.
+        """
+        c = constants
+        if os.path.exists(dirpath):
+            files_in_dir = sorted(os.listdir(dirpath))
+            if len(files_in_dir) == 0:
+                if c['delete'] and c['delete_empty_dirs']:
+                    try:
+                        os.remove(dirpath)
+                        logger.info('Deleted: ' + self.enc(dirpath))
+                    except:
+                        logger.error('Could not delete: ' +
+                                     self.enc(dirpath))
+        else:
+            logger.error('Does not exist: ' + self.enc(dirpath))
+
+    def delete_file(self, filepath, constants, logger):
+        """ Delete the file given.
+        """
+        c = constants
+        if os.path.exists(filepath):
+            if not c['delete']:
+                logger.info('Deleting (dry-run): ' + self.enc(filepath))
+            else:
+                try:
+                    os.remove(filepath)
+                    logger.info('Deleting: ' + self.enc(filepath))
+                except:
+                    logger.error('Coult not delete: ' +
+                                 self.enc(filepath))
+        else:
+            logger.error('Does not exist: ' + self.enc(filepath))
+
+        if c['delete_empty_dirs']:
+            dirpath = os.path.dirname(filepath)
+            self.delete_empty_dir(dirpath=dirpath)

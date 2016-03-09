@@ -64,12 +64,12 @@ class Index(object):
         dirpath = dirpath.rstrip(os.path.sep)
         assert os.path.isdir(dirpath)
         num_sep = dirpath.count(os.path.sep)
-        for root, dirs, files in sorted(os.walk(dirpath)):
+        for root, dirs, files in os.walk(dirpath):
             yield root, dirs, files
             if not isinstance(level, type(None)):
                 level = int(level)
                 num_sep_this = root.count(os.path.sep)
-                if num_sep + level <= num_sep_this:
+                if num_sep + int(level) <= num_sep_this:
                     del dirs[:]
 
     def traverse(self, limit):
@@ -82,7 +82,6 @@ class Index(object):
         silent = self.c['silent']
         for root, dirs, files in self.walklevel(dirpath=src_dir,
                                                 level=max_walk_level):
-
             path = root.split('/')
             if not silent:
                 print (len(path) - 1) * '-', root
