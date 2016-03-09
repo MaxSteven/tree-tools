@@ -64,7 +64,7 @@ class Index(object):
         dirpath = dirpath.rstrip(os.path.sep)
         assert os.path.isdir(dirpath)
         num_sep = dirpath.count(os.path.sep)
-        for root, dirs, files in os.walk(dirpath):
+        for root, dirs, files in sorted(os.walk(dirpath)):
             yield root, dirs, files
             if not isinstance(level, type(None)):
                 level = int(level)
