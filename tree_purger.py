@@ -17,6 +17,7 @@ def main():
     DEFAULT_LOG = 'tree_purger.log'
     DEFAULT_REGEX = '.*'
     DEFAULT_DAYS = '0'
+    DEFAULT_MAX_WALK = None
     parser = OptionParser(version='%prog ' + TREE_PURGER)
     parser.add_option(
         '-s', '--source-dir', dest='sourcedir',
@@ -36,6 +37,9 @@ def main():
     parser.add_option(
         '-d', '--days', dest='days', default=DEFAULT_DAYS,
         help='Keep files which are DAYS days old [default: %default]')
+    parser.add_option(
+        '-m', '--max-walk-level', dest='maxwalklevel', default=DEFAULT_MAX_WALK,
+        help='Max directory levels to traverse [default: %default]')
     parser.add_option(
         '--index-only', action='store_true', dest='indexonly', default=False,
         help='Only index directory tree and generate index.json.')
@@ -64,6 +68,7 @@ def main():
     c['index_file'] = options.index
     c['log_file'] = options.logfile
     c['days'] = options.days
+    c['max_walk_level'] = options.maxwalklevel
     c['index_only'] = options.indexonly
     c['skip_indexing'] = options.skipindexing
     c['delete'] = options.delete
@@ -73,7 +78,7 @@ def main():
 
     # Run
     if os.path.isdir(c['src_dir']):
-        Purge()
+        Purge(constants=c)
     else:
         print 'The directory specified does not exist or \
                         is not accessible.'
@@ -111,7 +116,7 @@ class Purge(object):
         # Delete files
         if not c['index_only']:
             for filepath, ddata in index.iteritems():
-                self.delete_file(filepath=filepath)
+                functions.delete_file(filepath=filepath, constants=c, logger=logger)
 
         # Summary
         summary = functions.summary(index=index, constants=c)
