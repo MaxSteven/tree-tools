@@ -76,12 +76,35 @@ class TreeFunctions(object):
         """
         summary = {}
 
-        b = 0
-        for filepath, ddata in index.iteritems():
-            b += ddata['b']  # bytes
-        size = self.nice_number(b=b)
+        # Source dir
+        src_dir = constants['src_dir']
+        summary['src_dir'] = os.path.realpath(src_dir)
 
-        summary['size'] = size
+        # Number of items
+        item_count = len(index)
+        summary['item_count'] = str(item_count)
+
+        # Collect sizes and store in variables
+        b_sum = 0
+        b_list = []
+        for filepath, ddata in index.iteritems():
+            b_sum += ddata['b']  # bytes summed
+            b_list.append(ddata['b'])  # bytes in list
+        b_list_ordered = sorted(b_list)  # bytes in ordered list
+
+        # Total size
+        summary['size_total'] = self.nice_number(b=b_sum)
+
+        # Average size
+        b_average = int(float(b_sum) / float(item_count))
+        summary['size_average'] = self.nice_number(b=b_average)
+
+        # Trimmed mean, remove 5% extremes
+        p = int(len(b_list_ordered) * 0.05) + 1
+        if not p >= (len(b_list_ordered)/2):
+            b_list_ordered = b_list_ordered[p:-p]
+        b_trimmed_mean = sum(b_list_ordered)/len(b_list_ordered)
+        summary['size_trimmedmean'] = self.nice_number(b=b_trimmed_mean)
 
         return summary
 

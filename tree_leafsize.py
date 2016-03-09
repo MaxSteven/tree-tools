@@ -106,7 +106,7 @@ class LeafSize(object):
 
         # Log
         logger.info('Leaves: ' + str(len(index)))
-        logger.info('Total size: ' + summary['size'])
+        logger.info('Total size: ' + summary['size_total'])
         logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
 
 if __name__ == '__main__':

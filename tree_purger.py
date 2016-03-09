@@ -105,7 +105,7 @@ class Purge(object):
 
         # Log
         logger.info('Files: ' + str(len(index)))
-        logger.info('Total size: ' + summary['size'])
+        logger.info('Total size: ' + summary['size_total'])
         logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
 
     def delete_empty_dir(self, dirpath):

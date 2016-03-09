@@ -21,8 +21,16 @@ class Charts(object):
             index = functions.sort_index_by_size(index=index)
 
         # Create charts
-        self.bar_chart(index=index, unit=unit, div=div, summary=summary)
-        self.pie_chart(index=index, unit=unit, div=div, summary=summary)
+        self.bar_chart(constants=constants,
+                       index=index,
+                       unit=unit,
+                       div=div,
+                       summary=summary)
+        self.pie_chart(constants=constants,
+                       index=index,
+                       unit=unit,
+                       div=div,
+                       summary=summary)
 
     def determine_unit(self, index):
         """ Determine proper unit for bytes
@@ -36,7 +44,7 @@ class Charts(object):
         unit = size.split(' ')[1]
         return unit, div
 
-    def bar_chart(self, index, unit, div, summary):
+    def bar_chart(self, constants, index, unit, div, summary):
         """ Create a simple bar chart
         """
 
@@ -44,7 +52,8 @@ class Charts(object):
             div = 1  # prevent division if zero
 
         chart = pygal.Bar(truncate_legend=35)
-        chart.title = 'Total size: ' + summary['size']
+        chart.title = self.set_title(summary=summary)
+
         if isinstance(index, list):
             # Index has been sorted
             for item in index:
@@ -63,14 +72,14 @@ class Charts(object):
                 chart.add(nice_size + ' ' + name, values)
         chart.render_to_file('tree_leafsize_bar_chart.svg')
 
-    def pie_chart(self, index, unit, div, summary):
+    def pie_chart(self, constants, index, unit, div, summary):
         """ Create a simple pie chart
         """
         if div == 0:
             div = 1  # prevent division if zero
 
         chart = pygal.Pie(truncate_legend=35)
-        chart.title = 'Total size: ' + summary['size']
+        chart.title = self.set_title(summary=summary)
 
         if isinstance(index, list):
             # Index has been sorted
@@ -89,3 +98,13 @@ class Charts(object):
                 nice_size = functions.nice_number(b=value['b'])
                 chart.add(nice_size + ' ' + name, values)
         chart.render_to_file('tree_leafsize_pie_chart.svg')
+
+    def set_title(self, summary):
+        title = ''
+        title += summary['src_dir'] + '\n'
+        title += 'Total size: ' + summary['size_total'] + '\n'
+        title += 'Average size: ' + summary['size_average'] + '\n'
+        title += 'Trimmed mean size: ' + summary['size_trimmedmean'] + '\n'
+        title += 'Item count: ' + summary['item_count'] + '\n'
+
+        return title
