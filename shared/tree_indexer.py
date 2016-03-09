@@ -60,46 +60,51 @@ class Index(object):
 
         return index
 
+    def walklevel(self, dirpath, level=None):
+        dirpath = dirpath.rstrip(os.path.sep)
+        assert os.path.isdir(dirpath)
+        num_sep = dirpath.count(os.path.sep)
+        for root, dirs, files in os.walk(dirpath):
+            yield root, dirs, files
+            if not isinstance(level, type(None)):
+                level = int(level)
+                num_sep_this = root.count(os.path.sep)
+                if num_sep + level <= num_sep_this:
+                    del dirs[:]
+
     def traverse(self, limit):
         """ Based on indexer method, directory will be traversed and files
         will get registered for specific action.
         """
         index = {}  # json dictionary
-        tool = self.c['tool']
+        src_dir = self.c['src_dir']
+        max_walk_level = self.c['max_walk_level']
         silent = self.c['silent']
-        roots_to_skip = []
+        for root, dirs, files in self.walklevel(dirpath=src_dir,
+                                                level=max_walk_level):
 
-        for root, dirs, files in os.walk(unicode(self.c['src_dir'])):
-            skip_root = False
-            for r in roots_to_skip:
-                if root.startswith(r):
-                    skip_root = True
+            path = root.split('/')
+            if not silent:
+                print (len(path) - 1) * '-', root
 
-            if not skip_root:
-                path = root.split('/')
-                if not silent:
-                    print (len(path) - 1) * '-', root
+            # Use items rather than root+file,
+            # in order to also parse directories
+            items = sorted(files + dirs)
+            for i in items:
+                filepath = os.path.join(root, i)
 
-                # Use items rather than root+file,
-                # in order to also parse directories
-                items = sorted(files + dirs)
-                for i in items:
-                    filepath = os.path.join(root, i)
+                index = self.reg_check(index=index,
+                                       filepath=filepath,
+                                       limit=limit)
 
-                    index = self.reg_check(index=index,
-                                           filepath=filepath,
-                                           limit=limit)
-
-                    if filepath in index:
-                        size = functions.nice_number(b=index[filepath]['b'])
-                        size = '(' + size + ')'
-                        if tool == 'tree_leafsize':
-                            roots_to_skip.append(filepath)  # skip sub-folders
-                        if not silent:
-                            print len(path)*'-', i, size
-                    else:
-                        if not silent:
-                            print len(path)*'-', i
+                if filepath in index:
+                    size = functions.nice_number(b=index[filepath]['b'])
+                    size = '(' + size + ')'
+                    if not silent:
+                        print len(path)*'-', i, size
+                else:
+                    if not silent:
+                        print len(path)*'-', i
 
         return index
 

@@ -17,6 +17,7 @@ DEFAULT_JSON = 'tree_leafsize_index.json'
 DEFAULT_LOG = 'tree_leafsize.log'
 DEFAULT_REGEX = '.*'
 DEFAULT_DAYS = '0'
+DEFAULT_MAX_WALK = None
 parser = OptionParser(version='%prog ' + TREE_LEAFSIZE)
 parser.add_option(
     '-s', '--source-dir', dest='sourcedir',
@@ -36,6 +37,9 @@ parser.add_option(
 parser.add_option(
     '-d', '--days', dest='days', default=DEFAULT_DAYS,
     help='Skip leaves which are DAYS days old [default: %default]')
+parser.add_option(
+    '-m', '--max-walk-level', dest='maxwalklevel', default=DEFAULT_MAX_WALK,
+    help='Max directory levels to traverse [default: %default]')
 parser.add_option(
     '--index-only', action='store_true', dest='indexonly', default=False,
     help='Only index directory tree and generate index.json.')
@@ -60,6 +64,7 @@ c['regex'] = options.regex
 c['index_file'] = options.index
 c['log_file'] = options.logfile
 c['days'] = options.days
+c['max_walk_level'] = options.maxwalklevel
 c['index_only'] = options.indexonly
 c['skip_indexing'] = options.skipindexing
 c['sort_by_size'] = options.sortbysize
