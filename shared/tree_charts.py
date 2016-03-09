@@ -103,8 +103,9 @@ class Charts(object):
         title = ''
         title += summary['src_dir'] + '\n'
         title += 'Total size: ' + summary['size_total'] + '\n'
-        title += 'Average size: ' + summary['size_average'] + '\n'
-        title += 'Trimmed mean size: ' + summary['size_trimmedmean'] + '\n'
+        title += 'Average item size: ' + summary['size_average'] + '\n'
+        title += 'Trimmed mean item size: ' \
+                 + summary['size_trimmedmean'] + '\n'
         title += 'Item count: ' + summary['item_count'] + '\n'
 
         return title
