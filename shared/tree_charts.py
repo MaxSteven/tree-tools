@@ -17,20 +17,20 @@ class Charts(object):
         unit, div = self.determine_unit(index=index)
         summary = functions.summary(index=index, constants=constants)
 
-        if self.c['sort_by_size']:
-            index = functions.sort_index_by_size(index=index)
-
-        # Create charts
-        self.bar_chart(constants=constants,
-                       index=index,
-                       unit=unit,
-                       div=div,
-                       summary=summary)
-        self.pie_chart(constants=constants,
-                       index=index,
-                       unit=unit,
-                       div=div,
-                       summary=summary)
+        if summary['item_count'] != 0:
+            if self.c['sort_by_size']:
+                index = functions.sort_index_by_size(index=index)
+            # Create charts
+            self.bar_chart(constants=constants,
+                           index=index,
+                           unit=unit,
+                           div=div,
+                           summary=summary)
+            self.pie_chart(constants=constants,
+                           index=index,
+                           unit=unit,
+                           div=div,
+                           summary=summary)
 
     def determine_unit(self, index):
         """ Determine proper unit for bytes
