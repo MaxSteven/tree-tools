@@ -81,7 +81,7 @@ class Index(object):
 
                 # Use items rather than root+file,
                 # in order to also parse directories
-                items = files + dirs
+                items = sorted(files + dirs)
                 for i in items:
                     filepath = os.path.join(root, i)
 

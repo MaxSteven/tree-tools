@@ -112,7 +112,7 @@ class Purge(object):
         """ Deletes directory of file, if the directory is empty.
         """
         if os.path.exists(dirpath):
-            files_in_dir = os.listdir(dirpath)
+            files_in_dir = sorted(os.listdir(dirpath))
             if len(files_in_dir) == 0:
                 if c['delete'] and c['delete_empty_dirs']:
                     try:
