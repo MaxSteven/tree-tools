@@ -107,7 +107,7 @@ class LeafSize(object):
         # Log
         logger.info('Leaves: ' + str(len(index)))
         logger.info('Total size: ' + summary['size_total'])
-        logger.info('Average item size: ' + summary['size_average'])
+        logger.info('Average/mean item size: ' + summary['size_average'])
         logger.info('Trimmed mean item size: ' + summary['size_trimmedmean'])
         logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
 
