@@ -16,6 +16,7 @@ class Index(object):
         super(Index, self).__init__()
 
         self.c = constants
+        self.logger = logger
 
         # Log
         logger.info('Indexing started at ' + unicode(self.c['now_timestamp']))
@@ -168,7 +169,10 @@ class Index(object):
 
     def file_size(self, filepath):
         # File size in bytes
-        b = os.stat(filepath).st_size
+        try:
+            b = os.stat(filepath).st_size
+        except:
+            self.logger.error('Could not get size for ' + filepath)
         return b
 
     def folder_tree_size(self, filepath):
@@ -178,7 +182,10 @@ class Index(object):
             items = dirs + files
             for i in items:
                 fp = os.path.join(root, i)
-                b += os.stat(fp).st_size
+                try:
+                    b += os.stat(fp).st_size
+                except:
+                    self.logger.error('Could not get size for ' + fp)
         return b
 
     def write_json(self, data):
