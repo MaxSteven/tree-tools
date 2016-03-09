@@ -94,7 +94,7 @@ class Index(object):
                         size = functions.nice_number(b=index[filepath]['b'])
                         size = '(' + size + ')'
                         if tool == 'tree_leafsize':
-                            roots_to_skip.append(root)  # skip sub-folders
+                            roots_to_skip.append(filepath)  # skip sub-folders
                         if not silent:
                             print len(path)*'-', i, size
                     else:
