@@ -102,7 +102,7 @@ class LeafSize(object):
         for key, value in index.iteritems():
             size = functions.nice_number(b=value['b'])
             logger.info('Leaf: ' + functions.enc(key) + ' (' + size + ')')
-        summary = functions.summary(index=index)
+        summary = functions.summary(index=index, constants=c)
 
         # Log
         logger.info('Leaves: ' + str(len(index)))

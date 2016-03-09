@@ -101,7 +101,7 @@ class Purge(object):
                 self.delete_file(filepath=filepath)
 
         # Summary
-        summary = functions.summary(index=index)
+        summary = functions.summary(index=index, constants=c)
 
         # Log
         logger.info('Files: ' + str(len(index)))

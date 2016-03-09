@@ -71,7 +71,7 @@ class TreeFunctions(object):
             b /= 1024.0
             div += 1024.0
 
-    def summary(self, index):
+    def summary(self, index, constants):
         """ Create summary and return
         """
         summary = {}

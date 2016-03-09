@@ -15,7 +15,7 @@ class Charts(object):
 
         self.c = constants
         unit, div = self.determine_unit(index=index)
-        summary = functions.summary(index=index)
+        summary = functions.summary(index=index, constants=constants)
 
         if self.c['sort_by_size']:
             index = functions.sort_index_by_size(index=index)
