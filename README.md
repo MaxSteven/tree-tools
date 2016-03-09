@@ -1,4 +1,6 @@
-# tree_purger
+# tree-tools
+
+## tree_purger
 Python script to purge a directory tree of files based on different criteria
 
 ```
@@ -26,9 +28,8 @@ Options:
   --silent              Do not output progress (faster).
   ```
 
-# tree_leafsize
-
-Python script to analyze a directory and create charts based on different criteria
+## tree_leafsize
+Python script to analyze a directory tree of files and create charts based on different criteria
 
 ```
 Usage: tree_leafsize.py [options]
