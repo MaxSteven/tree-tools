@@ -66,31 +66,41 @@ class Index(object):
         index = {}  # json dictionary
         tool = self.c['tool']
         silent = self.c['silent']
-        
+        roots_to_skip = []
+
         for root, dirs, files in os.walk(unicode(self.c['src_dir'])):
-            path = root.split('/')
-            if not silent:
-                print (len(path) - 1) * '-', root
+            skip_root = False
+            for r in roots_to_skip:
+                if root.startswith(r):
+                    skip_root = True
 
-            # Use items rather than root+file, in order to include directories
-            items = files + dirs
-            for i in items:
-                item_registered = False
-                filepath = os.path.join(root, i)
+            if not skip_root:
+                path = root.split('/')
+                if not silent:
+                    print (len(path) - 1) * '-', root
 
-                index = self.reg_check(index=index, filepath=filepath, limit=limit)
+                # Use items rather than root+file,
+                # in order to also parse directories
+                items = files + dirs
+                for i in items:
+                    filepath = os.path.join(root, i)
 
-                if filepath in index:
-                    size = '('+functions.nice_number(b=index[filepath]['b'])+')'
-                    if not silent:
-                        print len(path)*'-', i, size
-                else:
-                    if not silent:
-                        print len(path)*'-', i
+                    index = self.reg_check(index=index,
+                                           filepath=filepath,
+                                           limit=limit)
 
+                    if filepath in index:
+                        size = functions.nice_number(b=index[filepath]['b'])
+                        size = '(' + size + ')'
+                        if tool == 'tree_leafsize':
+                            roots_to_skip.append(root)  # skip sub-folders
+                        if not silent:
+                            print len(path)*'-', i, size
+                    else:
+                        if not silent:
+                            print len(path)*'-', i
 
         return index
-
 
     def reg_check(self, index, filepath, limit):
         """ Check if the filepath matches the criteria or not
