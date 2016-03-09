@@ -33,7 +33,7 @@ Python script to analyze a directory tree of files and create charts based on di
 
 #### Prerequisites
 
-Charts are made using [pygal](http://www.pygal.org). Install with `pip install pygal`.
+Charts are made using [Pygal](http://www.pygal.org). Install with `pip install pygal`.
 
 ```
 Usage: tree_leafsize.py [options]
