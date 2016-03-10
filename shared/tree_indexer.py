@@ -110,12 +110,13 @@ class Index(object):
                     # node = len(path)*'-' + ' ' + i
                     # sys.stdout.write(node)
                     if filepath in index:
-                        sys.stdout.write(' ...')
                         size = functions.nice_number(b=index[filepath]['b'])
                         size = ' ' + size + '\n'
                         sys.stdout.write(size)
+                        sys.stdout.flush()
                     else:
                         sys.stdout.write('\n')
+                        sys.stdout.flush()
 
         return index
 
@@ -164,6 +165,8 @@ class Index(object):
                     item_registered = True
 
         if item_registered:
+            sys.stdout.write(' ...')
+            sys.stdout.flush()
             index = self.add_sizedata(index=index, filepath=filepath)
 
         return index
