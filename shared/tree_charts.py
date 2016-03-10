@@ -13,24 +13,32 @@ class Charts(object):
     def __init__(self, logger, constants, index):
         super(Charts, self).__init__()
 
-        self.c = constants
+        c = constants
         unit, div = self.determine_unit(index=index)
         summary = functions.summary(index=index, constants=constants)
 
         if summary['item_count'] != 0:
-            if self.c['sort_by_size']:
+            if c['sort_by_size']:
                 index = functions.sort_index_by_size(index=index)
             # Create charts
-            self.bar_chart(constants=constants,
+            self.bar_chart(constants=c,
                            index=index,
                            unit=unit,
                            div=div,
                            summary=summary)
-            self.pie_chart(constants=constants,
+            logger.info('Created bar chart: ' +
+                        functions.enc(
+                            os.path.abspath(
+                                c['bar_chart_file'])))
+            self.pie_chart(constants=c,
                            index=index,
                            unit=unit,
                            div=div,
                            summary=summary)
+            logger.info('Created pie chart: ' +
+                        functions.enc(
+                            os.path.abspath(
+                                c['pie_chart_file'])))
 
     def determine_unit(self, index):
         """ Determine proper unit for bytes
@@ -51,6 +59,9 @@ class Charts(object):
         if div == 0:
             div = 1  # prevent division if zero
 
+        c = constants
+        chart_filepath = c['pie_chart_file']
+
         chart = pygal.Bar(truncate_legend=35)
         chart.title = self.set_title(summary=summary)
 
@@ -70,13 +81,16 @@ class Charts(object):
                 values = [value['b'] / div]
                 nice_size = functions.nice_number(b=value['b'])
                 chart.add(nice_size + ' ' + name, values)
-        chart.render_to_file('tree_leafsize_bar_chart.svg')
+        chart.render_to_file(chart_filepath)
 
     def pie_chart(self, constants, index, unit, div, summary):
         """ Create a simple pie chart
         """
         if div == 0:
             div = 1  # prevent division if zero
+
+        c = constants
+        chart_filepath = c['pie_chart_file']
 
         chart = pygal.Pie(truncate_legend=35)
         chart.title = self.set_title(summary=summary)
@@ -97,7 +111,7 @@ class Charts(object):
                 values = [value['b'] / div]
                 nice_size = functions.nice_number(b=value['b'])
                 chart.add(nice_size + ' ' + name, values)
-        chart.render_to_file('tree_leafsize_pie_chart.svg')
+        chart.render_to_file(chart_filepath)
 
     def set_title(self, summary):
         title = ''

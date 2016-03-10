@@ -19,6 +19,8 @@ def main():
     DEFAULT_REGEX = '.*'
     DEFAULT_DAYS = '0'
     DEFAULT_MAX_WALK = None
+    DEFAULT_PIE_CHART = 'tree_leafsize_pie_chart.svg'
+    DEFAULT_BAR_CHART = 'tree_leafsize_bar_chart.svg'
     parser = OptionParser(version='%prog ' + TREE_LEAFSIZE)
     parser.add_option(
         '-s', '--source-dir', dest='sourcedir',
@@ -35,6 +37,14 @@ def main():
         '-l', '--log', dest='logfile',
         default=DEFAULT_LOG,
         help='Path to log file [default: %default]')
+    parser.add_option(
+        '-p', '--pie-chart', dest='piechart',
+        default=DEFAULT_PIE_CHART,
+        help='Path to pie chart SVG file [default: %default]')
+    parser.add_option(
+        '-b', '--bar-chart', dest='barchart',
+        default=DEFAULT_BAR_CHART,
+        help='Path to bar chart SVG file [default: %default]')
     parser.add_option(
         '-d', '--days', dest='days', default=DEFAULT_DAYS,
         help='Skip leaves which are DAYS days old [default: %default]')
@@ -64,6 +74,8 @@ def main():
     c['regex'] = options.regex
     c['index_file'] = options.index
     c['log_file'] = options.logfile
+    c['pie_chart_file'] = options.piechart
+    c['bar_chart_file'] = options.barchart
     c['days'] = options.days
     c['max_walk_level'] = options.maxwalklevel
     c['index_only'] = options.indexonly
@@ -109,12 +121,6 @@ class LeafSize(object):
         # Read json index
         index = functions.read_json(filepath=c['index_file'])  # load index
 
-        # Create charts here
-        if not c['index_only']:
-            tree_charts.Charts(logger=logger,
-                               constants=c,
-                               index=index)
-
         # Summary
         for key, value in index.iteritems():
             size = functions.nice_number(b=value['b'])
@@ -126,8 +132,14 @@ class LeafSize(object):
         logger.info('Total size: ' + summary['size_total'])
         logger.info('Average/mean item size: ' + summary['size_average'])
         logger.info('Trimmed mean item size: ' + summary['size_trimmedmean'])
-        logger.info('Purge completed: ' + unicode(datetime.datetime.now()))
 
+        # Create charts here
+        if not c['index_only']:
+            tree_charts.Charts(logger=logger,
+                               constants=c,
+                               index=index)
+
+        logger.info('Leaf size completed: ' + unicode(datetime.datetime.now()))
 
 if __name__ == '__main__':
     main()

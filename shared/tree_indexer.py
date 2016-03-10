@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import json
 import re
 
@@ -84,7 +85,9 @@ class Index(object):
                                                 level=max_walk_level):
             path = root.split('/')
             if not silent:
-                print (len(path) - 1) * '-', root
+                # print (len(path) - 1) * '-', root
+                node = (len(path) - 1) * '-' + ' ' + root + '\n'
+                sys.stdout.write(node)
 
             # Use items rather than root+file,
             # in order to also parse directories
@@ -96,14 +99,17 @@ class Index(object):
                                        filepath=filepath,
                                        limit=limit)
 
-                if filepath in index:
-                    size = functions.nice_number(b=index[filepath]['b'])
-                    size = '(' + size + ')'
-                    if not silent:
-                        print len(path)*'-', i, size
-                else:
-                    if not silent:
-                        print len(path)*'-', i
+                if not silent:
+                    node = len(path)*'-' + ' ' + i
+                    # print len(path)*'-', i
+                    sys.stdout.write(node)
+                    if filepath in index:
+                        sys.stdout.write(' ...')
+                        size = functions.nice_number(b=index[filepath]['b'])
+                        size = ' ' + size + '\n'
+                        sys.stdout.write(size)
+                    else:
+                        sys.stdout.write('\n')
 
         return index
 
