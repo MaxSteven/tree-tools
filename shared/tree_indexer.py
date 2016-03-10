@@ -95,12 +95,15 @@ class Index(object):
             for i in items:
                 filepath = os.path.join(root, i)
 
+                if not silent:
+                    node = len(path)*'-' + ' ' + i
+
                 index = self.reg_check(index=index,
                                        filepath=filepath,
                                        limit=limit)
 
                 if not silent:
-                    node = len(path)*'-' + ' ' + i
+                    # node = len(path)*'-' + ' ' + i
                     # print len(path)*'-', i
                     sys.stdout.write(node)
                     if filepath in index:
