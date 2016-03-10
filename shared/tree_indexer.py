@@ -88,6 +88,7 @@ class Index(object):
                 # print (len(path) - 1) * '-', root
                 root_node = (len(path) - 1) * '-' + ' ' + root + '\n'
                 sys.stdout.write(root_node)
+                sys.stdout.flush()
 
             # Use items rather than root+file,
             # in order to also parse directories
@@ -98,7 +99,7 @@ class Index(object):
                 if not silent:
                     node = len(path)*'-' + ' ' + i
                     sys.stdout.write(node)
-
+                    sys.stdout.flush()
 
                 index = self.reg_check(index=index,
                                        filepath=filepath,
