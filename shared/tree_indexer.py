@@ -86,8 +86,8 @@ class Index(object):
             path = root.split('/')
             if not silent:
                 # print (len(path) - 1) * '-', root
-                node = (len(path) - 1) * '-' + ' ' + root + '\n'
-                sys.stdout.write(node)
+                root_node = (len(path) - 1) * '-' + ' ' + root + '\n'
+                sys.stdout.write(root_node)
 
             # Use items rather than root+file,
             # in order to also parse directories
@@ -97,15 +97,17 @@ class Index(object):
 
                 if not silent:
                     node = len(path)*'-' + ' ' + i
+                    sys.stdout.write(node)
+
 
                 index = self.reg_check(index=index,
                                        filepath=filepath,
                                        limit=limit)
 
                 if not silent:
-                    # node = len(path)*'-' + ' ' + i
                     # print len(path)*'-', i
-                    sys.stdout.write(node)
+                    # node = len(path)*'-' + ' ' + i
+                    # sys.stdout.write(node)
                     if filepath in index:
                         sys.stdout.write(' ...')
                         size = functions.nice_number(b=index[filepath]['b'])
